@@ -4,7 +4,9 @@ import App from "../App";
 
 test("inputs should be initially empty", () => {
   render(<App />);
-  const emailInputElement = screen.getByRole("textbox");
+  const emailInputElement = screen.getByRole("textbox", {
+    name: /email/i,
+  });
   const passwordInputElement = screen.getByLabelText("Password");
   const confirmPasswordInputElement =
     screen.getByLabelText(/confirm password/i);
@@ -36,4 +38,28 @@ test("should be able to type into the confirm Passsword field", () => {
     screen.getByLabelText(/confirm password/i);
   userEvent.type(confirmPasswordInputElement, "confirmtestPassword123");
   expect(confirmPasswordInputElement.value).toBe("confirmtestPassword123");
+});
+
+test("inputting wrong email should receive a warning", () => {
+  render(<App />);
+  const emailInputElement = screen.getByRole("textbox", {
+    name: /email/i,
+  });
+  const submitBtnElement = screen.getByRole("button", {
+    name: /submit/i,
+  });
+  const wrongEmailWarningEl = screen.queryByText(
+    /the email you input is invalid/i
+  );
+
+  expect(wrongEmailWarningEl).not.toBeInTheDocument();
+
+  userEvent.type(emailInputElement, "wrongemailatgmail.com");
+  userEvent.click(submitBtnElement);
+
+  const wrongEmailWarningElAgain = screen.queryByText(
+    /the email you input is invalid/i
+  );
+
+  expect(wrongEmailWarningElAgain).toBeInTheDocument();
 });
